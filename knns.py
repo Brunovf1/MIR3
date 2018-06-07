@@ -3,7 +3,10 @@ import pandas as pd
 import csv
 
 from sklearn.neighbors import KNeighborsClassifier as KNN
-# from sklearn.model_selection import cross_val_score
+
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import mutual_info_classif
+from sklearn.model_selection import cross_val_score
 
 import os
 
@@ -18,17 +21,21 @@ y = df.GENRE.values
 X = df.drop(['GENRE'], axis=1).values
 test = pd.read_csv(DATA_PATH + DATA_FILES[0])
 
+kbest = SelectKBest(mutual_info_classif, k=100)
+
+X_new = kbest.fit_transform(X, y)
+
 # for nn in range(3, 30):
 #     knn = KNN(n_neighbors=nn)
 #     # knn.fit(X, y)
-#     scores = cross_val_score(knn, X, y, cv=5)
+#     scores = cross_val_score(knn, X_new, y, cv=5)
 #     print('scores de ' + str(nn))
-#     print(scores)
+#     print(sum(scores) / 5)
 
 knn = KNN(n_neighbors=8)
-knn.fit(X, y)
+knn.fit(X_new, y)
 
-pred = knn.predict(test)
+pred = knn.predict(kbest.transform(test))
 
 print(pred)
 pred_int = []
@@ -51,7 +58,7 @@ for ea in pred:
 preddf = pd.DataFrame(pred_int[:len(pred)], columns=['"Genres"'])
 preddf.index = np.arange(1, len(preddf) + 1)
 preddf.to_csv('submission.csv', index_label='"Id"', quoting=csv.QUOTE_NONE)
-# #
+# # #
 
 
-# print(df.describe())
+# # print(df.describe())
