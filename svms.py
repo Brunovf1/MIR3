@@ -25,44 +25,46 @@ test = pd.read_csv(DATA_PATH + DATA_FILES[0])
 
 # X_new = kbest.fit_transform(X, y)
 
-svc = SVC(kernel="linear")
+svc = SVC(kernel="linear", verbose=True)
 
 # for nn in range(3, 30):
-#     
+#
 #     # knn.fit(X, y)
 #     scores = cross_val_score(knn, X_new, y, cv=5)
 #     print('scores de ' + str(nn))
 #     print(sum(scores) / 5)
 X_new = X
 
-print(cross_val_score(svc, X_new, y, cv=5))
+svc.fit(X, y)
+
+# print(cross_val_score(svc, X_new, y, cv=5))
 
 # test = kbest.transform(test)
-# # pred = svc.predict(test)
+pred = svc.predict(test)
 
 
-# print(pred)
-# pred_int = []
-# for ea in pred:
-#     if ea == "Pop":
-#         pred_int.append(5)
-#     elif ea == "Blues":
-#         pred_int.append(1)
-#     elif ea == "Jazz":
-#         pred_int.append(3)
-#     elif ea == "Classical":
-#         pred_int.append(2)
-#     elif ea == "Rock":
-#         pred_int.append(6)
-#     elif ea == "Metal":
-#         pred_int.append(4)
+print(pred)
+pred_int = []
+for ea in pred:
+    if ea == "Pop":
+        pred_int.append(5)
+    elif ea == "Blues":
+        pred_int.append(1)
+    elif ea == "Jazz":
+        pred_int.append(3)
+    elif ea == "Classical":
+        pred_int.append(2)
+    elif ea == "Rock":
+        pred_int.append(6)
+    elif ea == "Metal":
+        pred_int.append(4)
 
-# # print(pred_int)
+# print(pred_int)
 
-# preddf = pd.DataFrame(pred_int[:len(pred)], columns=['"Genres"'])
-# preddf.index = np.arange(1, len(preddf) + 1)
-# preddf.to_csv('submission.csv', index_label='"Id"', quoting=csv.QUOTE_NONE)
-# # # #
+preddf = pd.DataFrame(pred_int[:len(pred)], columns=['"Genres"'])
+preddf.index = np.arange(1, len(preddf) + 1)
+preddf.to_csv('submission.csv', index_label='"Id"', quoting=csv.QUOTE_NONE)
+# # #
 
 
-# # # print(df.describe())
+# # print(df.describe())
