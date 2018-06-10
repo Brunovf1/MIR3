@@ -2,10 +2,13 @@ import numpy as np
 import pandas as pd
 import csv
 
-from sklearn.svm import SVC
+# from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import mutual_info_classif
+from sklearn.feature_selection import SelectFromModel
+from sklearn.feature_selection import *
 from sklearn.model_selection import cross_val_score
 
 import os
@@ -21,17 +24,30 @@ y = df.GENRE.values
 X = df.drop(['GENRE'], axis=1).values
 test = pd.read_csv(DATA_PATH + DATA_FILES[0])
 
-# kbest = SelectKBest(mutual_info_classif, k=100)
+
+# kbest = SelectKBest(f_classif, k=100)
 
 # X_new = kbest.fit_transform(X, y)
 
-svc = SVC(kernel="linear", verbose=True)
 
-X_new = X
+tree = ExtraTreesClassifier()
+tree = tree.fit(X, y)
+smodel = SelectFromModel(tree, prefit=True)
 
-svc.fit(X_new, y)
+X_new = smodel.transform(X)
 
-pred = svc.predict(test)
+nn = MLPClassifier(hidden_layer_sizes=(128, 128))
+
+# X_new = X
+
+print(cross_val_score(nn, X_new, y, cv=5))
+
+nn.fit(X_new, y)
+
+# pred = nn.predict(kbest.transform(test))
+pred = nn.predict(smodel.transform(test))
+
+# pred = nn.predict(test)
 
 print(pred)
 pred_int = []
