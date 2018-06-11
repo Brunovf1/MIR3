@@ -1,14 +1,18 @@
 import numpy as np
 import pandas as pd
 import csv
+import matplotlib.pyplot as plt
 
 # from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import SelectFromModel
+from sklearn.preprocessing import *
+
+# from sklearn.feature_selection import SelectKBest
+# from sklearn.feature_selection import SelectFromModel
 from sklearn.feature_selection import *
+
 from sklearn.model_selection import cross_val_score
 
 import os
@@ -33,10 +37,11 @@ test = pd.read_csv(DATA_PATH + DATA_FILES[0])
 tree = ExtraTreesClassifier()
 tree = tree.fit(X, y)
 smodel = SelectFromModel(tree, prefit=True)
-
 X_new = smodel.transform(X)
 
-nn = MLPClassifier(hidden_layer_sizes=(128, 128))
+X_new = robust_scale(X_new)
+
+nn = MLPClassifier(hidden_layer_sizes=(128, 128), max_iter=100, )
 
 # X_new = X
 
@@ -66,6 +71,8 @@ for ea in pred:
         pred_int.append(4)
 
 # print(pred_int)
+plt.hist(pred_int)
+plt.show()
 
 preddf = pd.DataFrame(pred_int[:len(pred)], columns=['"Genres"'])
 preddf.index = np.arange(1, len(preddf) + 1)
