@@ -21,8 +21,10 @@ from scipy import stats
 
 import os
 
+np.random.seed(42)
 
-def pertileFilter(X, low=.05, high=.95):
+
+def percentileFilter(X, low=.05, high=.95):
     quant_df = X.quantile([low, high])
     X = X.apply(lambda x: x[(x >= quant_df.loc[low, x.name]) &
                             (x <= quant_df.loc[high, x.name])], axis=0)
@@ -39,30 +41,29 @@ print(df.GENRE.unique())
 df = df[(np.abs(stats.zscore(df.drop(['GENRE'], axis=1))) < 3).all(axis=1)]
 y = df.GENRE
 X = df.drop(['GENRE'], axis=1)
-print(X.shape)
+# print(X.shape)
 
-# kbest = SelectKBest(f_classif, k=100)
+clf1 = RandomForestClassifier(n_estimators=30, bootstrap=False,
+                              min_samples_leaf=1, min_samples_split=3,
+                              criterion='gini', max_features=10)
+clf2 = RandomForestClassifier(n_estimators=20, bootstrap=False,
+                              min_samples_leaf=1, min_samples_split=3,
+                              criterion='gini', max_features=10)
+clf3 = RandomForestClassifier()
+clf4 = RandomForestClassifier()
+# clf5 = MLPClassifier(hidden_layer_sizes=(128, 128))
 
-# X_new = kbest.fit_transform(X, y)
+nn_pipe = [('reduce_dim', SelectFromModel(ExtraTreesClassifier())),
+           ('clf', MLPClassifier(hidden_layer_sizes=(128, 128)))]
+clf5 = Pipeline(nn_pipe)
 
+clf = VotingClassifier(
+    estimators=[('RF30', clf1), ('RF20', clf2), ('nn128,128', clf5)])
 
-tree = ExtraTreesClassifier()
-tree = tree.fit(X, y)
-smodel = SelectFromModel(tree, prefit=True)
-X_new = smodel.transform(X)
+print(cross_val_score(clf, X, y, cv=5))
+clf.fit(X, y)
 
-# X_new = robust_scale(X_new)
-
-nn = MLPClassifier(hidden_layer_sizes=(128, 128), )
-
-# X_new = X
-
-print(cross_val_score(nn, X_new, y, cv=5))
-
-nn.fit(X_new, y)
-
-# pred = nn.predict(kbest.transform(test))
-pred = nn.predict(smodel.transform(test))
+pred = clf.predict(test)
 
 # pred = nn.predict(test)
 
